@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+  <style>
+
+  .arc text {
+    font: 10px sans-serif;
+    text-anchor: middle;
+  }
+
+  .arc path {
+    stroke: #fff;
+  }
+
+  </style>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- View port for Responsive web pages -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Age-Wise Liteacy rate pie-chart</title>
+
+    <!-- Linking the Style sheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- <link href="css/test.css" rel="stylesheet"> -->
+
+  </head>
+
+  <body>
+
+    <!-- Linking the JQuery File -->
+    <script src="js/jquery-1.12.4.js"></script>
+    <div class="container">
+      <div class="row">
+        <center><h1>Age-Wise Liteacy rate pie-chart</h1><center>
+      </div>
+    </div>
+
+
+    <hr />
+    <br />
+
+    <!-- For Creating the table -->
+    <div class="container">
+      <div class="row">
+      	<div class="col-sm-6">
+      			<table class="table" id="tb1">
+      				<thead>
+      					<tr>
+      						<th>
+      							S.No
+      						</th>
+      						<th>
+      							Age-Group
+      						</th>
+      						<th>
+      							Literate - Persons (Scale *1000000)
+      						</th>
+      						<th>
+
+      						</th>
+      					</tr>
+      				</thead>
+              <tbody>
+              </tbody>
+            </table>
+
+            <script>
+                var i=1;
+                var myObj=[{"Age-group":"0-6","Literate - Persons":"0"},{"Age-group":"7","Literate - Persons":"45"},{"Age-group":"8","Literate - Persons":"58"},{"Age-group":"9","Literate - Persons":"53"},{"Age-group":"10","Literate - Persons":"68"},
+                  {"Age-group":"11","Literate - Persons":"57"},{"Age-group":"12","Literate - Persons":"64"},{"Age-group":"13","Literate - Persons":"56"},{"Age-group":"14","Literate - Persons":"58"},{"Age-group":"15","Literate - Persons":"58"},
+                  {"Age-group":"16","Literate - Persons":"55"},{"Age-group":"17","Literate - Persons":"47"},{"Age-group":"18","Literate - Persons":"60"},{"Age-group":"19","Literate - Persons":"45"},{"Age-group":"20-24","Literate - Persons":"228"},
+                  {"Age-group":"25-29","Literate - Persons":"191"},{"Age-group":"30-34","Literate - Persons":"154"},{"Age-group":"35-39","Literate - Persons":"136"},{"Age-group":"40-44","Literate - Persons":"107"},{"Age-group":"45-49","Literate - Persons":"86"},
+                  {"Age-group":"50-54","Literate - Persons":"65"},{"Age-group":"55-59","Literate - Persons":"49"},{"Age-group":"60-64","Literate - Persons":"40"},{"Age-group":"65-69","Literate - Persons":"26"},{"Age-group":"70-74","Literate - Persons":"17"},
+                  {"Age-group":"75-79","Literate - Persons":"8"},{"Age-group":"80+","Literate - Persons":"9"},{"Age-group":"Age not stated","Literate - Persons":"6"}];
+
+
+                for (var i = 0; i < myObj.length; i++)
+                {
+                    drawRow(myObj[i]);
+                }
+
+                // For Drawing the Graph
+                $(document).ready(function()
+                {
+                    drawGraph(myObj);
+                });
+
+                // For Drawing the Table
+                function drawRow(rowData)
+                {
+                    var row = $("<tr />")
+                    $("#tb1").append(row); //Appending each row
+                    row.append($("<td id='sno'>" + (i+1) + "</td>"));
+                    row.append($("<td>" + rowData["Age-group"] + "</td>"));
+                    row.append($("<td>" + rowData["Literate - Persons"] + "</td>"));
+                  //  row.append($("<td><a class='removebutton'><img src='images/delete_button.png' /></a></td>"));
+                  row.append($("<td><a class='removebutton'> Delete </a> </td>"));
+                }
+
+
+
+                $(document).on('click', 'a.removebutton', function ()
+                {
+                    var deleteButton=confirm("Are you sure to delete?");
+
+                    if(deleteButton==true)
+                    {
+                        var dis=$(this).closest('tr').children('td#sno').text();
+                        myObj[parseInt(dis)-1]["Age-group"]="";
+                        myObj[parseInt(dis)-1]["Literate - Persons"]="";
+                        console.log("Calling the drawGraph method");
+
+                        drawGraph(myObj);
+                        console.log(myObj);
+                        console.log("After calling the drawGraph method");
+                        $(this).closest('tr').remove();
+                        return false;
+                    }
+
+                });
+
+            </script>
+          </div>
+
+
+          <!-- For Drawing the Graph -->
+		      <div class="col-sm-6" id="second">
+
+            <!-- Including the D3.js -->
+            <script src="js/d3.min.js"></script>
+
+            <script>
+
+              // set the dimensions of SVG
+              function drawGraph(myObj)
+              {
+                    // Emptying the Div each time
+                    $('div#second').empty();
+
+                    // Setting the margin for SVG
+                    // var margin = {top: 20, right: 20, bottom: 70, left: 80};
+                    // var width = 500 - margin.left - margin.right;
+                    // var height = 500 - margin.top - margin.bottom;
+
+
+
+                    var width = 960,
+                        height = 500,
+                        radius = Math.min(width, height) / 2;
+
+                    var color = d3.scale.category20b();
+
+
+
+
+                    // Reading the myObj Data
+
+                    myObj.forEach(function(d)
+                    {
+                            d["Age-group"] = d["Age-group"];
+                            d["Literate - Persons"] = + parseInt(d["Literate - Persons"]);
+                    });
+
+
+
+
+
+
+                    // scale the range of the data
+
+
+                    var arc = d3.svg.arc()
+                        .outerRadius(radius - 10)
+                        .innerRadius(0);
+
+                    var labelArc = d3.svg.arc()
+                        .outerRadius(radius - 40)
+                        .innerRadius(radius - 40);
+
+                    var pie = d3.layout.pie()
+                        .sort(null)
+                        .value(function(d) { return d['Literate - Persons']; });
+
+                    var svg = d3.select("div#second").append("svg")
+                        .attr("width", width)
+                        .attr("height", height)
+                      .append("g")
+                        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+
+                    var g = svg.selectAll(".arc")
+                        .data(pie(myObj))
+                      .enter().append("g")
+                        .attr("class", "arc");
+
+                    g.append("path")
+                        .attr("d", arc)
+                        .style("fill", function(d) { return color(d.data['Age-group']); });
+
+                    g.append("text")
+                        .attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; })
+                        .attr("dy", ".35em")
+                        .text(function(d) { return d.data['Age-group']; });
+
+
+
+                        // // Add the SVG element
+                        // var svg = d3.select("body").append("svg")
+                        //     .attr("width", width)
+                        //     .attr("height", height)
+                        //   .append("g")
+                        //     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+
+                }
+
+            </script>
+
+		      </div>
+	      </div>
+    </div>
+
+    <!-- Link for the Second Web Page -->
+    <div class="container">
+        <div class="row">
+        <div class="container">
+            <div class="row">
+                  <center><a href="bargraph.html" id="prev"> &nbsp; Previous &nbsp;</a></center>
+            </div>
+        </div>
+
+        </div>
+    </div>
+
+    <!-- Linking the Bootstrap js File -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery-1.12.4.js"></script>
+
+
+  </body>
+</html>

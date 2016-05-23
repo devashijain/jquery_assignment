@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- View port for Responsive web pages -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Education Category</title>
+
+    <!-- Linking the Style sheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link href="css/style.css" rel="stylesheet"> -->
+
+  </head>
+
+  <body>
+
+    <!-- Linking the JQuery File -->
+    <script src="js/jquery-1.12.4.js"></script>
+    <div class="container">
+      <div class="row">
+        <center><h1>Graph for education-category-wise litercy population</h1><center>
+      </div>
+    </div>
+
+
+    <hr />
+    <br />
+
+    <!-- For Creating the table -->
+    <div class="container">
+      <div class="row">
+      	<div class="col-sm-6">
+      			<table class="table" id="tb1">
+      				<thead>
+      					<tr>
+      						<th>
+      							S.No
+      						</th>
+      						<th>
+      							Education Level
+      						</th>
+      						<th>
+      							Literate_Persons(Scale=100000
+      						</th>
+      						<th>
+
+      						</th>
+      					</tr>
+      				</thead>
+              <tbody>
+              </tbody>
+            </table>
+
+            <script>
+                var i=1;
+                var myObj=[{"Education_Level":"Without Education","Literate_Persons":"43"},{"Education_Level":"Below Primary","Literate_Persons":"188"},{"Education_Level":"Primary","Literate_Persons":"230"},{"Education_Level":"Middle","Literate_Persons":"165"},{"Education_Level":"Matric","Literate_Persons":"124"},{"Education_Level":"HSC","Literate_Persons":"90"},{"Education_Level":"Non-Technical Diploma","Literate_Persons":"1"},{"Education_Level":"Technical Diploma","Literate_Persons":"8"},{"Education_Level":"Graduate","Literate_Persons":"76"},{"Education_Level":"Unclassified","Literate_Persons":"4"}];
+
+                for (var i = 0; i < myObj.length; i++)
+                {
+                    drawRow(myObj[i]);
+                }
+
+                // For Drawing the Graph
+                $(document).ready(function()
+                {
+                    drawGraph(myObj);
+                });
+
+                // For Drawing the Table
+                function drawRow(rowData)
+                {
+                    var row = $("<tr />")
+                    $("#tb1").append(row); //Appending each row
+                    row.append($("<td id='sno'>" + (i+1) + "</td>"));
+                    row.append($("<td>" + rowData.Education_Level + "</td>"));
+                    row.append($("<td>" + rowData.Literate_Persons + "</td>"));
+                  //  row.append($("<td><a class='removebutton'><img src='images/delete_button.png' /></a></td>"));
+                  row.append($("<td><a class='removebutton'> Delete </a> </td>"));
+                }
+
+
+
+                $(document).on('click', 'a.removebutton', function ()
+                {
+                    var deleteButton=confirm("Are you sure to delete?");
+
+                    if(deleteButton==true)
+                    {
+                        var dis=$(this).closest('tr').children('td#sno').text();
+                        myObj[parseInt(dis)-1]="";
+                        drawGraph(myObj);
+                        $(this).closest('tr').remove();
+                        return false;
+                    }
+
+                });
+
+            </script>
+          </div>
+
+
+          <!-- For Drawing the Graph -->
+		      <div class="col-sm-6" id="second">
+
+            <!-- Including the D3.js -->
+            <script src="js/d3.min.js"></script>
+
+            <script>
+
+              // set the dimensions of SVG
+              function drawGraph(myObj)
+              {
+                    // Emptying the Div each time
+                    $('div#second').empty();
+
+                    // Setting the margin for SVG
+                    var margin = {top: 20, right: 20, bottom: 70, left: 80};
+                    var width = 500 - margin.left - margin.right;
+                    var height = 500 - margin.top - margin.bottom;
+
+
+                    // set the ranges of X and Y Axis
+                    var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
+
+                    var y = d3.scale.linear().range([height, 0]);
+
+                    // Define the axis
+                    var xAxis = d3.svg.axis()
+                          .scale(x)
+                          .orient("bottom")
+
+
+                    var yAxis = d3.svg.axis()
+                          .scale(y)
+                          .orient("left");
+
+
+                    // Add the SVG element
+                    var svg = d3.select("div#second").append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform",
+                              "translate(" + margin.left + "," + margin.top + ")");
+
+
+                    // Reading the myObj Data
+
+                    myObj.forEach(function(d)
+                    {
+                            d.Education_Level = d.Education_Level;
+                            d.Literate_Persons = + parseInt(d.Literate_Persons);
+                    });
+
+                    // scale the range of the data
+                    x.domain(myObj.map(function(d) { return d.Education_Level; }));
+                    y.domain([0, d3.max(myObj, function(d) { return d.Literate_Persons; })]);
+
+
+                    // X-Axis
+                    svg.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis)
+                        .selectAll("text")
+                        .style("text-anchor", "end")
+                        .attr("dx", "-.8em")
+                        .attr("dy", "-.55em")
+                        .attr("transform", "rotate(-30)" );
+
+                    // Y-Axis
+                    svg.append("g")
+                          .attr("class", "y axis")
+                          .call(yAxis)
+                          .append("text")
+                          .attr("transform", "rotate(-90)")
+                          .attr("y", 5)
+                          .attr("dy", ".71em")
+                          .style("text-anchor", "end")
+                          .text("(Population * 1000000)");
+
+
+                    // Add bar chart
+                    svg.selectAll("rect")
+                        .data(myObj)
+                        .enter().append("rect")
+                        .attr("class", "rect")
+                        .attr("x", function(d) { return x(d.Education_Level); })
+                        .attr("width", x.rangeBand())
+                        .attr("y", function(d) { return y(parseInt(d.Literate_Persons)); })
+                        .attr("height", function(d) { return height - y(parseInt(d.Literate_Persons)); });
+                }
+
+            </script>
+
+		      </div>
+	      </div>
+    </div>
+
+    <!-- Link for the Second Web Page -->
+    <div class="container">
+        <div class="row">
+              <center><a href="piechart.html" id="next"> &nbsp; Next &nbsp;</a></center>
+        </div>
+    </div>
+
+    <!-- Linking the Bootstrap js File -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery-1.12.4.js"></script>
+
+
+  </body>
+</html>
